@@ -10,8 +10,7 @@
 #include <unistd.h>
 #include "utils.hpp"
 
-int start_client(const std::string &service_type, const std::string &server_address, uint port,
-                 const std::string &message) {
+int start_client(std::string &service_type, const std::string &server_address, uint port, std::string &message) {
     struct sockaddr_in addr{};
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
@@ -22,8 +21,8 @@ int start_client(const std::string &service_type, const std::string &server_addr
         close(sock);
         return EXIT_FAILURE;
     }
+    if (service_type == "m") service_type += message;
     send(sock, service_type.c_str(), service_type.size(), 0);
-    if (service_type == "m") send(sock, message.c_str(), message.size(), 0);
     char response[100];
     response[recv(sock, response, 100, 0)] = '\0';
     printf("Server: %s\n", response);

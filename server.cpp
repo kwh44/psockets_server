@@ -11,9 +11,8 @@
 #include "utils.hpp"
 
 void start_server(int port_number) {
-    const size_t buffer_size = 1024;
+    const size_t buffer_size = 65535;
     char buf[buffer_size];
-    char message[1024];
     char hello_message[] = "Hello\n";
     struct sockaddr_in server{};
     memset(&server, 0, sizeof(server));
@@ -23,7 +22,7 @@ void start_server(int port_number) {
     int sd = socket(AF_INET, SOCK_STREAM, 0);
     bind(sd, (struct sockaddr *) &server, sizeof(server));
     listen(sd, 1);
-    for (; sd;) {
+    for (;sd;) {
         int psd = accept(sd, 0, 0);
         int cc = recv(psd, buf, buffer_size, 0);
         buf[cc] = '\0';
@@ -36,11 +35,8 @@ void start_server(int port_number) {
         } else if (buf[0] == 'h') {
             send(psd, hello_message, 5, 0);
         } else if (buf[0] == 'm') {
-            cc = recv(psd, message, buffer_size, 0);
-            message[cc] = '\0';
-            auto words_num = std::to_string(1 + std::count(message, message + cc, ' '));
+            auto words_num = std::to_string(1 + std::count(buf + 1, buf + cc, ' '));
             send(psd, words_num.c_str(), words_num.size(), 0);
-            message[0] = '\0';
         }
         close(psd);
         buf[0] = '\0';
